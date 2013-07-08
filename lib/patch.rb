@@ -11,14 +11,16 @@ RSpec::Core::Example.class_eval do
 
   def run(example_group_instance, reporter)
     if metadata[:eventmachine]
+      result = false
       Fiber.new do
         EM.run do
           df = EM::DefaultDeferrable.new
           df.callback { |x| EM.stop }
-          ignorant_run(example_group_instance, reporter)
+          result = ignorant_run(example_group_instance, reporter)
           df.succeed
         end
       end.resume
+      result
     else
       ignorant_run(example_group_instance, reporter)
     end
